@@ -1,49 +1,52 @@
 from db.run_sql import run_sql
 from models.albums import *
 from models.artist import *
+import repositories.artist_repository as art_repo
 
 def save(album):
-    sql = "INSERT INTO ablbums(title, genre, ) VALUES (%s) RETURNING *"
-    values = [artist.name]
+    sql = "INSERT INTO albums(title, genre, artist_id) VALUES (%s,%s,%s) RETURNING *"
+    values = [album.title, album.genre, album.artist.id]
     results = run_sql(sql,values)
     id = results[0]['id']
-    artist.id = id
-    return artist
+    album.id = id
+    return album
 
 
 def select_all():
-    artists = []
+    albums = []
 
-    sql = "SELECT * FROM artist"
+    sql = "SELECT * FROM albums"
     results = run_sql(sql)
 
     for row in results:
-        artist = Artist(row['name'], row['id'])
-        artists.append(artist)
-    return artists
+        artist = art_repo.select[row('artist_id')]
+        album = Albums(row['title'], row['genre'], artist)
+        albums.append(album)
+    return albums
 
 def select(id):
-    artist = None
+    album = None
 
-    sql = "SELECT * FROM artist WHERE id = %s"
+    sql = "SELECT * FROM albums WHERE id = %s"
     values = [id]
     results = run_sql(sql,values)[0]
     if results is not None:
-        artist = Artist(results['name'], results['id'])
-    return artist
+        artist = art_repo.select[('artist_id')]
+        album = Albums(['title'], ['genre'], artist)
+    return album
 
 def delete_all():
-    sql = "DELETE FROM artist"
+    sql = "DELETE FROM albums"
     run_sql(sql)
 
 def delete(id):
-    sql = "DELETE FROM artist WHERE id = %s"
+    sql = "DELETE FROM albums WHERE id = %s"
     values = [id]
     run_sql(sql,values)
 
-def update(artist):
-    sql = "UPDATE artist SET (name) = (%s) WHERE id = %s"
-    values = [artist.name, artist.id]
+def update(albums):
+    sql = "UPDATE albums SET (title, genre, artist_id) = (%s) WHERE id = %s"
+    values = [albums.title, albums.genre, albums.artist.id]
     run_sql(sql,values)
 
 
